@@ -1,0 +1,107 @@
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="utf-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1" />
+  <title>GDP vs GNP Interactive</title>
+  <link rel="stylesheet" href="style.css" />
+</head>
+<body>
+  <header class="container">
+    <h1>GDP vs GNP: Border vs Ownership</h1>
+    <p class="sub">
+      Drag each card into the correct bin for the <strong>U.S.</strong>:
+      <strong>GDP</strong>, <strong>GNP</strong>, <strong>Both</strong>, or <strong>Neither</strong>.
+      Then compute totals.
+    </p>
+
+    <div class="controls">
+      <label>
+        Number of cards:
+        <select id="nCards">
+          <option value="8">8</option>
+          <option value="10" selected>10</option>
+          <option value="12">12</option>
+          <option value="15">15</option>
+        </select>
+      </label>
+
+      <button id="newRoundBtn">New Round</button>
+      <button id="checkBtn">Check Answers</button>
+      <button id="computeBtn">Compute GDP/GNP</button>
+      <button id="resetBtn" class="ghost">Reset Bins</button>
+    </div>
+
+    <div id="status" class="status" aria-live="polite"></div>
+  </header>
+
+  <main class="container grid">
+    <section class="cards">
+      <h2>Cards</h2>
+      <div id="cardPool" class="dropzone pool" data-bin="POOL" aria-label="Card pool"></div>
+      <p class="hint">
+        Tip: GDP is about <strong>where</strong> production happens. GNP is about <strong>who</strong> earns production/factor income.
+      </p>
+    </section>
+
+    <section class="bins">
+      <h2>Bins</h2>
+      <div class="binRow">
+        <div class="bin">
+          <h3>GDP only</h3>
+          <div id="binGDP" class="dropzone" data-bin="GDP" aria-label="GDP bin"></div>
+        </div>
+
+        <div class="bin">
+          <h3>GNP only</h3>
+          <div id="binGNP" class="dropzone" data-bin="GNP" aria-label="GNP bin"></div>
+        </div>
+      </div>
+
+      <div class="binRow">
+        <div class="bin">
+          <h3>Both GDP &amp; GNP</h3>
+          <div id="binBOTH" class="dropzone" data-bin="BOTH" aria-label="Both bin"></div>
+        </div>
+
+        <div class="bin">
+          <h3>Neither / Not part of output</h3>
+          <div id="binNEITHER" class="dropzone" data-bin="NEITHER" aria-label="Neither bin"></div>
+        </div>
+      </div>
+
+      <div class="results">
+        <h2>Results</h2>
+        <div class="resultGrid">
+          <div class="metric">
+            <div class="label">Score</div>
+            <div id="scoreVal" class="value">—</div>
+          </div>
+          <div class="metric">
+            <div class="label">GDP</div>
+            <div id="gdpVal" class="value">—</div>
+          </div>
+          <div class="metric">
+            <div class="label">GNP</div>
+            <div id="gnpVal" class="value">—</div>
+          </div>
+          <div class="metric">
+            <div class="label">NFIA</div>
+            <div id="nfiaVal" class="value">—</div>
+          </div>
+        </div>
+        <div id="explain" class="explain"></div>
+      </div>
+    </section>
+  </main>
+
+  <footer class="container footer">
+    <p>
+      Identity: <code>GNP = GDP + NFIA</code> where <code>NFIA</code> is net factor income from abroad.
+    </p>
+  </footer>
+
+  <script src="data.js"></script>
+  <script src="app.js"></script>
+</body>
+</html>
