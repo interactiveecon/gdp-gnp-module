@@ -8,11 +8,6 @@ const els = {
   resetBtn: document.getElementById("resetBtn"),
   status: document.getElementById("status"),
 
-    // rubric strip
-  ruleGDP: document.getElementById("ruleGDP"),
-  ruleGNP: document.getElementById("ruleGNP"),
-  ruleID: document.getElementById("ruleID"),
-
   pool: document.getElementById("cardPool"),
   bins: {
     GDP: document.getElementById("binGDP"),
@@ -28,25 +23,34 @@ const els = {
   nfiaVal: document.getElementById("nfiaVal"),
   explain: document.getElementById("explain"),
 
-  // progress (optional UI elements in the updated index.html)
+  // progress
   placedCount: document.getElementById("placedCount"),
-  totalCount: document.getElementById("totalCount")
+  totalCount: document.getElementById("totalCount"),
+
+  // rubric strip
+  ruleGDP: document.getElementById("ruleGDP"),
+  ruleGNP: document.getElementById("ruleGNP"),
+  ruleID: document.getElementById("ruleID")
 };
 
-let currentItems = []; // active round items
+let currentItems = [];
 let draggedId = null;
 
 function money(millions) {
   return `$${millions.toFixed(0)}m`;
 }
 
-function correctBin(item) {
-  const gdp = !!item.gdpCounts;
-  const gnp = !!item.gnpCounts;
-  if (gdp && gnp) return "BOTH";
-  if (gdp && !gnp) return "GDP";
-  if (!gdp && gnp) return "GNP";
-  return "NEITHER";
+function setStatus(msg) {
+  if (els.status) els.status.textContent = msg;
+}
+
+/**
+ * Eligibility:
+ * - Drop nonoutput cards (user requested)
+ * - Keep production + factor cards
+ */
+function eligibleForThisLab(item) {
+  return item && (item.type === "production" || item.type === "factor");
 }
 
 function shuffle(arr) {
@@ -59,7 +63,39 @@ function shuffle(arr) {
 }
 
 function pickN(n) {
-  return shuffle(ITEM_BANK).slice(0, n);
+  const bank = ITEM_BANK.filter(eligibleForThisLab);
+  return shuffle(bank).slice(0, n);
+}
+
+/**
+ * Correct bin logic (your 4 buckets):
+ * - production:
+ *    * GDP only if gdpCounts true and gnpCounts false
+ *    * Both if gdpCounts true and gnpCounts true
+ * - factor flows:
+ *    * receipts from abroad (gnpSign > 0) -> GNP
+ *    * payments to abroad (gnpSign < 0)  -> NEITHER
+ */
+function correctBin(item) {
+  if (item.type === "factor") {
+    const sign = (typeof item.gnpSign === "number") ? item.gnpSign : 0;
+    if (sign > 0) return "GNP";
+    if (sign < 0) return "NEITHER";
+    return "NEITHER";
+  }
+
+  // production
+  const gdp = !!item.gdpCounts;
+  const gnp = !!item.gnpCounts;
+
+  if (gdp && gnp) return "BOTH";
+  if (gdp && !gnp) return "GDP";
+
+  // In this lab we are not serving "production abroad by U.S. factors" as separate output cards
+  // because we are using the identity approach (GDP + NFIA). If such a card exists, treat it as GNP.
+  if (!gdp && gnp) return "GNP";
+
+  return "NEITHER";
 }
 
 function clearFeedback() {
@@ -75,8 +111,22 @@ function clearFeedback() {
   els.explain.textContent = "";
 }
 
-function setStatus(msg) {
-  if (els.status) els.status.textContent = msg;
+function resetRubric() {
+  const items = [els.ruleGDP, els.ruleGNP, els.ruleID].filter(Boolean);
+  items.forEach(el => {
+    el.classList.remove("done");
+    const icon = el.querySelector(".rubric-icon");
+    if (icon) icon.textContent = "○";
+  });
+}
+
+function completeRubric() {
+  const items = [els.ruleGDP, els.ruleGNP, els.ruleID].filter(Boolean);
+  items.forEach(el => {
+    el.classList.add("done");
+    const icon = el.querySelector(".rubric-icon");
+    if (icon) icon.textContent = "✓";
+  });
 }
 
 function makeCard(item) {
@@ -124,7 +174,7 @@ function setupDropzone(zone) {
     const cardEl = document.getElementById(`card_${id}`);
     if (cardEl) zone.appendChild(cardEl);
 
-    // moving a card should clear old grading visuals (optional but feels nicer)
+    // clear grading visuals on move
     cardEl?.classList.remove("good", "bad");
     const fb = cardEl?.querySelector(".feedback");
     if (fb) fb.textContent = "";
@@ -133,56 +183,12 @@ function setupDropzone(zone) {
   });
 }
 
-function resetRubric() {
-  const items = [els.ruleGDP, els.ruleGNP, els.ruleID].filter(Boolean);
-  items.forEach(el => {
-    el.classList.remove("done");
-    const icon = el.querySelector(".rubric-icon");
-    if (icon) icon.textContent = "○";
-  });
-}
-
-function completeRubric() {
-  const items = [els.ruleGDP, els.ruleGNP, els.ruleID].filter(Boolean);
-  items.forEach(el => {
-    el.classList.add("done");
-    const icon = el.querySelector(".rubric-icon");
-    if (icon) icon.textContent = "✓";
-  });
-}
-
 function initDnD() {
   setupDropzone(els.pool);
   Object.values(els.bins).forEach(setupDropzone);
 }
 
-function renderRound(items) {
-  currentItems = items;
-
-  // clear zones
-  [els.pool, ...Object.values(els.bins)].forEach(z => (z.innerHTML = ""));
-  clearFeedback();
-
-  items.forEach(item => {
-    els.pool.appendChild(makeCard(item));
-  });
-
-  if (els.totalCount) els.totalCount.textContent = String(items.length);
-  updateProgressAndButtons();
-
-  resetRubric();
-}
-
-function resetBinsToPool() {
-  clearFeedback();
-  const allCards = document.querySelectorAll(".card");
-  allCards.forEach(c => els.pool.appendChild(c));
-  updateProgressAndButtons();
-  resetRubric();
-}
-
 function getPlacementMap() {
-  // returns { itemId: "GDP"|"GNP"|"BOTH"|"NEITHER"|"POOL" }
   const map = {};
   currentItems.forEach(it => (map[it.id] = "POOL"));
 
@@ -217,16 +223,37 @@ function updateProgressAndButtons() {
   if (els.totalCount) els.totalCount.textContent = String(total);
 
   const allPlaced = (placed === total && total > 0);
-
-  // Only enable once all are placed (more "product-like")
-  if (els.checkBtn) els.checkBtn.disabled = !allPlaced;
-  if (els.computeBtn) els.computeBtn.disabled = !allPlaced;
+  els.checkBtn.disabled = !allPlaced;
+  els.computeBtn.disabled = !allPlaced;
 
   if (!allPlaced) {
     setStatus(`Place all cards to enable Check/Compute (${placed}/${total} placed).`);
   } else {
     setStatus("All cards placed. You can Check answers or Compute totals.");
   }
+}
+
+function renderRound(items) {
+  currentItems = items;
+
+  // clear zones
+  [els.pool, ...Object.values(els.bins)].forEach(z => (z.innerHTML = ""));
+  clearFeedback();
+  resetRubric();
+
+  items.forEach(item => {
+    els.pool.appendChild(makeCard(item));
+  });
+
+  if (els.totalCount) els.totalCount.textContent = String(items.length);
+  updateProgressAndButtons();
+}
+
+function resetBinsToPool() {
+  clearFeedback();
+  resetRubric();
+  document.querySelectorAll(".card").forEach(c => els.pool.appendChild(c));
+  updateProgressAndButtons();
 }
 
 function checkAnswers() {
@@ -257,31 +284,24 @@ function checkAnswers() {
 }
 
 function computeTotals() {
-  // totals are based on the true definitions, not student placement
-  // GDP sums production items with gdpCounts
-  // GNP sums:
-  //   - production items with gnpCounts (positive)
-  //   - factor items with gnpCounts using gnpSign (+/-)
-  // NFIA is the sum of factor items' signed values (in this simplified module)
+  // Pedagogically clean:
+  // GDP = sum of domestic production (production items with gdpCounts=true)
+  // NFIA = sum of factor items with gnpSign (+ for receipts, - for payments)
+  // GNP = GDP + NFIA
   let gdp = 0;
-  let gnp = 0;
   let nfia = 0;
 
   currentItems.forEach(item => {
     if (item.type === "production" && item.gdpCounts) {
       gdp += item.value;
     }
-
-    if (item.gnpCounts) {
-      if (item.type === "production") {
-        gnp += item.value;
-      } else if (item.type === "factor") {
-        const sign = (typeof item.gnpSign === "number") ? item.gnpSign : +1;
-        gnp += sign * item.value;
-        nfia += sign * item.value;
-      }
+    if (item.type === "factor") {
+      const sign = (typeof item.gnpSign === "number") ? item.gnpSign : 0;
+      nfia += sign * item.value;
     }
   });
+
+  const gnp = gdp + nfia;
 
   els.gdpVal.textContent = money(gdp);
   els.gnpVal.textContent = money(gnp);
@@ -293,16 +313,15 @@ function computeTotals() {
     "GNP equals GDP";
 
   const nfiaText =
-    (nfia > 0) ? "NFIA is positive: U.S. residents earn more factor income abroad than foreigners earn here." :
-    (nfia < 0) ? "NFIA is negative: foreigners earn more factor income from U.S. production than U.S. residents earn abroad." :
+    (nfia > 0) ? "NFIA is positive: U.S. factors receive more income from abroad than they pay to foreign factors." :
+    (nfia < 0) ? "NFIA is negative: U.S. pays more factor income to foreign factors than U.S. factors receive from abroad." :
     "NFIA is zero: net factor income flows cancel out.";
 
   els.explain.textContent =
-    `${relation} in this set because ${nfiaText} Identity check: GNP = GDP + NFIA.`;
+    `${relation} in this set. ${nfiaText} Identity check: GNP = GDP + NFIA.`;
 
   completeRubric();
-
-  setStatus("Computed totals based on the economic definitions.");
+  setStatus("Computed totals using GNP = GDP + NFIA.");
 }
 
 function newRound() {
@@ -319,7 +338,6 @@ function init() {
   els.computeBtn.addEventListener("click", computeTotals);
   els.resetBtn.addEventListener("click", resetBinsToPool);
 
-  // ensure correct initial UI state
   updateProgressAndButtons();
 }
 
