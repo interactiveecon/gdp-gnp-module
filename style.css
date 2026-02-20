@@ -3,19 +3,18 @@
   --font-sans: "Inter", ui-sans-serif, system-ui, -apple-system, "Segoe UI", Roboto, Helvetica, Arial, sans-serif;
   --font-serif: "Source Serif 4", ui-serif, Georgia, "Times New Roman", serif;
 
-  /* Soft academic palette (warm neutrals) */
-  --paper: #f6f2ea;      /* page background */
-  --panel: #ffffff;      /* cards/panels */
-  --ink: #1f2937;        /* main text */
-  --ink-2: #374151;      /* secondary text */
-  --muted: #6b7280;      /* muted */
-  --line: #e7dfd2;       /* warm border */
-  --line-2: #d9cfbf;     /* stronger border */
+  /* Soft academic palette (warm paper) */
+  --paper: #f6f2ea;
+  --panel: #ffffff;
+  --ink: #1f2937;
+  --ink-2: #374151;
+  --muted: #6b7280;
+  --line: #e7dfd2;
+  --line-2: #d9cfbf;
   --shadow: 0 1px 2px rgba(17,24,39,0.06), 0 10px 24px rgba(17,24,39,0.06);
 
-  /* Accents (subtle) */
-  --accent: #2f5d7c;     /* calm academic blue */
-  --accent-2: #8b5a2b;   /* warm brown */
+  /* Accents */
+  --accent: #2f5d7c;
   --focus: #2563eb;
 
   /* Bin accents */
@@ -49,7 +48,6 @@ body{
   border-bottom: 1px solid var(--line);
   background: linear-gradient(180deg, rgba(255,255,255,0.75), rgba(255,255,255,0));
 }
-
 .header-inner{
   display:grid;
   grid-template-columns: 1.4fr 1fr;
@@ -105,7 +103,7 @@ h1{
 .howto-body ul{ margin: 0 0 8px 18px; }
 .howto-note{ margin: 0; color: var(--muted); }
 
-/* Controls card */
+/* Controls */
 .controls-card{
   background: var(--panel);
   border: 1px solid var(--line);
@@ -113,7 +111,6 @@ h1{
   padding: 14px;
   box-shadow: var(--shadow);
 }
-
 .controls-top{
   display:flex;
   justify-content: space-between;
@@ -121,14 +118,12 @@ h1{
   align-items: end;
   flex-wrap: wrap;
 }
-
 .control label{
   display:block;
   font-size: 12px;
   color: var(--muted);
   margin-bottom: 6px;
 }
-
 select{
   width: 120px;
   border: 1px solid var(--line-2);
@@ -138,7 +133,6 @@ select{
   color: var(--ink);
   background: #fff;
 }
-
 .progress{
   display:flex;
   flex-direction: column;
@@ -166,7 +160,6 @@ select{
   gap: 10px;
   margin-top: 12px;
 }
-
 .btn{
   border: 1px solid var(--line-2);
   background: #fff;
@@ -343,12 +336,12 @@ h2{
 .good{ border-color: rgba(27,127,75,0.70) !important; }
 .bad{  border-color: rgba(180,35,24,0.70) !important; }
 
-/* --- Rubric strip (polish) --- */
+/* Rubric strip */
 .rubric{
   display:grid;
   grid-template-columns: 1fr 1fr 1fr;
   gap: 10px;
-  margin-top: 10px;
+  margin-top: 12px;
   margin-bottom: 14px;
 }
 @media (max-width: 650px){
@@ -396,7 +389,6 @@ h2{
   line-height: 1.35;
 }
 
-/* Completed state */
 .rubric-item.done{
   border-color: rgba(27,127,75,0.35);
   background: rgba(27,127,75,0.08);
@@ -409,12 +401,10 @@ h2{
 
 /* Results */
 .results{
-  margin-top: 16px;
+  margin-top: 6px;
   padding-top: 14px;
   border-top: 1px solid var(--line);
 }
-.results-head{ margin-bottom: 10px; }
-
 .metrics{
   display:grid;
   grid-template-columns: repeat(4, 1fr);
@@ -473,7 +463,6 @@ code{
   border-radius: 10px;
 }
 
-/* Focus */
 :focus-visible{
   outline: 3px solid var(--focus);
   outline-offset: 2px;
