@@ -16,11 +16,16 @@ const els = {
     NEITHER: document.getElementById("binNEITHER")
   },
 
+  // results
   scoreVal: document.getElementById("scoreVal"),
   gdpVal: document.getElementById("gdpVal"),
   gnpVal: document.getElementById("gnpVal"),
   nfiaVal: document.getElementById("nfiaVal"),
-  explain: document.getElementById("explain")
+  explain: document.getElementById("explain"),
+
+  // progress (optional UI elements in the updated index.html)
+  placedCount: document.getElementById("placedCount"),
+  totalCount: document.getElementById("totalCount")
 };
 
 let currentItems = []; // active round items
@@ -66,7 +71,7 @@ function clearFeedback() {
 }
 
 function setStatus(msg) {
-  els.status.textContent = msg;
+  if (els.status) els.status.textContent = msg;
 }
 
 function makeCard(item) {
@@ -107,13 +112,19 @@ function setupDropzone(zone) {
   zone.addEventListener("drop", (e) => {
     e.preventDefault();
     zone.classList.remove("dragover");
+
     const id = e.dataTransfer.getData("text/plain") || draggedId;
     if (!id) return;
 
     const cardEl = document.getElementById(`card_${id}`);
     if (cardEl) zone.appendChild(cardEl);
 
-    setStatus("Moved card.");
+    // moving a card should clear old grading visuals (optional but feels nicer)
+    cardEl?.classList.remove("good", "bad");
+    const fb = cardEl?.querySelector(".feedback");
+    if (fb) fb.textContent = "";
+
+    updateProgressAndButtons();
   });
 }
 
@@ -124,6 +135,7 @@ function initDnD() {
 
 function renderRound(items) {
   currentItems = items;
+
   // clear zones
   [els.pool, ...Object.values(els.bins)].forEach(z => (z.innerHTML = ""));
   clearFeedback();
@@ -132,14 +144,15 @@ function renderRound(items) {
     els.pool.appendChild(makeCard(item));
   });
 
-  setStatus(`New round loaded: ${items.length} cards.`);
+  if (els.totalCount) els.totalCount.textContent = String(items.length);
+  updateProgressAndButtons();
 }
 
 function resetBinsToPool() {
   clearFeedback();
   const allCards = document.querySelectorAll(".card");
   allCards.forEach(c => els.pool.appendChild(c));
-  setStatus("Bins reset.");
+  updateProgressAndButtons();
 }
 
 function getPlacementMap() {
@@ -165,10 +178,34 @@ function getPlacementMap() {
   return map;
 }
 
+function updateProgressAndButtons() {
+  const place = getPlacementMap();
+  const total = currentItems.length;
+  let placed = 0;
+
+  currentItems.forEach(item => {
+    if (place[item.id] && place[item.id] !== "POOL") placed++;
+  });
+
+  if (els.placedCount) els.placedCount.textContent = String(placed);
+  if (els.totalCount) els.totalCount.textContent = String(total);
+
+  const allPlaced = (placed === total && total > 0);
+
+  // Only enable once all are placed (more "product-like")
+  if (els.checkBtn) els.checkBtn.disabled = !allPlaced;
+  if (els.computeBtn) els.computeBtn.disabled = !allPlaced;
+
+  if (!allPlaced) {
+    setStatus(`Place all cards to enable Check/Compute (${placed}/${total} placed).`);
+  } else {
+    setStatus("All cards placed. You can Check answers or Compute totals.");
+  }
+}
+
 function checkAnswers() {
   const place = getPlacementMap();
   let correct = 0;
-  let totalPlaced = 0;
 
   currentItems.forEach(item => {
     const where = place[item.id];
@@ -177,13 +214,10 @@ function checkAnswers() {
 
     const target = correctBin(item);
 
-    // only count as "attempted" if not in pool
-    if (where !== "POOL") totalPlaced++;
-
     cardEl.classList.remove("good", "bad");
 
     if (where === target) {
-      if (where !== "POOL") correct++;
+      correct++;
       cardEl.classList.add("good");
       fb.textContent = "✓ Correct. " + item.explain;
     } else {
@@ -202,8 +236,7 @@ function computeTotals() {
   // GNP sums:
   //   - production items with gnpCounts (positive)
   //   - factor items with gnpCounts using gnpSign (+/-)
-  // NFIA is (factor income received from abroad) - (factor income paid to foreigners)
-  // In this simplified module, NFIA is the sum of factor items' signed values.
+  // NFIA is the sum of factor items' signed values (in this simplified module)
   let gdp = 0;
   let gnp = 0;
   let nfia = 0;
@@ -228,16 +261,15 @@ function computeTotals() {
   els.gnpVal.textContent = money(gnp);
   els.nfiaVal.textContent = `${nfia >= 0 ? "+" : "−"}${money(Math.abs(nfia))}`;
 
-  // Explanation text
-  const relation = (gnp > gdp) ? "GNP is greater than GDP"
-                  : (gnp < gdp) ? "GNP is less than GDP"
-                  : "GNP equals GDP";
+  const relation =
+    (gnp > gdp) ? "GNP is greater than GDP" :
+    (gnp < gdp) ? "GNP is less than GDP" :
+    "GNP equals GDP";
 
-  const nfiaText = (nfia > 0)
-    ? "NFIA is positive: U.S. residents earn more factor income abroad than foreigners earn here."
-    : (nfia < 0)
-      ? "NFIA is negative: foreigners earn more factor income from U.S. production than U.S. residents earn abroad."
-      : "NFIA is zero: net factor income flows cancel out.";
+  const nfiaText =
+    (nfia > 0) ? "NFIA is positive: U.S. residents earn more factor income abroad than foreigners earn here." :
+    (nfia < 0) ? "NFIA is negative: foreigners earn more factor income from U.S. production than U.S. residents earn abroad." :
+    "NFIA is zero: net factor income flows cancel out.";
 
   els.explain.textContent =
     `${relation} in this set because ${nfiaText} Identity check: GNP = GDP + NFIA.`;
@@ -258,6 +290,9 @@ function init() {
   els.checkBtn.addEventListener("click", checkAnswers);
   els.computeBtn.addEventListener("click", computeTotals);
   els.resetBtn.addEventListener("click", resetBinsToPool);
+
+  // ensure correct initial UI state
+  updateProgressAndButtons();
 }
 
 init();
