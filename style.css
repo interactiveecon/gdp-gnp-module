@@ -343,6 +343,70 @@ h2{
 .good{ border-color: rgba(27,127,75,0.70) !important; }
 .bad{  border-color: rgba(180,35,24,0.70) !important; }
 
+/* --- Rubric strip (polish) --- */
+.rubric{
+  display:grid;
+  grid-template-columns: 1fr 1fr 1fr;
+  gap: 10px;
+  margin-top: 10px;
+  margin-bottom: 14px;
+}
+@media (max-width: 650px){
+  .rubric{ grid-template-columns: 1fr; }
+}
+
+.rubric-item{
+  display:flex;
+  gap: 10px;
+  align-items:flex-start;
+  padding: 12px;
+  border-radius: 16px;
+  border: 1px solid var(--line);
+  background: rgba(246,242,234,0.55);
+  transition: background 0.2s ease, border-color 0.2s ease;
+}
+
+.rubric-icon{
+  width: 26px;
+  height: 26px;
+  border-radius: 999px;
+  display:inline-flex;
+  align-items:center;
+  justify-content:center;
+  font-weight: 800;
+  color: var(--muted);
+  border: 1px solid var(--line-2);
+  background: #fff;
+  flex: 0 0 26px;
+  margin-top: 2px;
+}
+
+.rubric-title{
+  font-size: 12px;
+  text-transform: uppercase;
+  letter-spacing: 0.08em;
+  color: var(--ink);
+  font-weight: 800;
+}
+
+.rubric-sub{
+  margin-top: 4px;
+  font-size: 13px;
+  color: var(--ink-2);
+  line-height: 1.35;
+}
+
+/* Completed state */
+.rubric-item.done{
+  border-color: rgba(27,127,75,0.35);
+  background: rgba(27,127,75,0.08);
+}
+.rubric-item.done .rubric-icon{
+  border-color: rgba(27,127,75,0.45);
+  color: #fff;
+  background: var(--good);
+}
+
 /* Results */
 .results{
   margin-top: 16px;
