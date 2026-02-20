@@ -3,7 +3,7 @@
 <head>
   <meta charset="utf-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1" />
-  <title>GDP vs GNP Interactive</title>
+  <title>GDP vs GNP Practice Lab</title>
 
   <!-- Inter (body) + Source Serif 4 (headings) for a soft academic feel -->
   <link rel="preconnect" href="https://fonts.googleapis.com">
@@ -19,20 +19,21 @@
         <div class="kicker">Macroeconomics Practice Lab</div>
         <h1>GDP vs GNP</h1>
         <p class="sub">
-          Sort each scenario for the <strong>U.S.</strong> into the correct bin. Then compute GDP, GNP, and NFIA.
-          Focus on the rule: <strong>GDP = where production occurs</strong>; <strong>GNP = who earns the income</strong>.
+          Sort each card for the <strong>U.S.</strong> into the correct bucket.
+          <strong>GDP</strong> is about <strong>where</strong> production occurs.
+          <strong>GNP</strong> is about <strong>who</strong> earns the income.
         </p>
 
         <details class="howto">
           <summary>How this works</summary>
           <div class="howto-body">
             <ul>
-              <li><strong>GDP</strong>: production within U.S. borders (location-based).</li>
-              <li><strong>GNP</strong>: production by U.S. residents anywhere + <strong>NFIA</strong> (ownership/residency-based).</li>
-              <li><strong>Identity</strong>: <code>GNP = GDP + NFIA</code>, where NFIA is net factor income from abroad.</li>
+              <li><strong>GDP</strong>: value of final goods/services produced <strong>inside the U.S.</strong></li>
+              <li><strong>GNP</strong>: <strong>GDP + NFIA</strong>, where NFIA is net factor income from abroad</li>
+              <li><strong>NFIA</strong>: income received from abroad by U.S. factors <em>minus</em> income paid to foreign factors</li>
             </ul>
             <p class="howto-note">
-              Tip: Some cards are <em>not production</em> (used goods, transfers, financial transactions). Those go in <strong>Neither</strong>.
+              In this lab, factor payments <em>to</em> foreign residents go in <strong>Neither</strong> (they reduce GNP through NFIA).
             </p>
           </div>
         </details>
@@ -47,6 +48,7 @@
               <option value="10" selected>10</option>
               <option value="12">12</option>
               <option value="15">15</option>
+              <option value="20">20</option>
             </select>
           </div>
 
@@ -72,7 +74,7 @@
     <section class="panel">
       <div class="panel-head">
         <h2>Scenarios</h2>
-        <p class="panel-sub">Drag cards into bins. Keep going until all cards are placed.</p>
+        <p class="panel-sub">Drag cards into bins until all are placed.</p>
       </div>
       <div id="cardPool" class="dropzone pool" data-bin="POOL" aria-label="Card pool"></div>
     </section>
@@ -87,7 +89,7 @@
         <div class="bin">
           <div class="bin-title">
             <span class="bin-accent gdp"></span>
-            <h3>GDP only</h3>
+            <h3>GDP</h3>
           </div>
           <div id="binGDP" class="dropzone" data-bin="GDP" aria-label="GDP bin"></div>
         </div>
@@ -95,7 +97,7 @@
         <div class="bin">
           <div class="bin-title">
             <span class="bin-accent gnp"></span>
-            <h3>GNP only</h3>
+            <h3>GNP</h3>
           </div>
           <div id="binGNP" class="dropzone" data-bin="GNP" aria-label="GNP bin"></div>
         </div>
@@ -103,7 +105,7 @@
         <div class="bin">
           <div class="bin-title">
             <span class="bin-accent both"></span>
-            <h3>Both GDP &amp; GNP</h3>
+            <h3>Both</h3>
           </div>
           <div id="binBOTH" class="dropzone" data-bin="BOTH" aria-label="Both bin"></div>
         </div>
@@ -111,43 +113,43 @@
         <div class="bin">
           <div class="bin-title">
             <span class="bin-accent neither"></span>
-            <h3>Neither / Not output</h3>
+            <h3>Neither (incl. factor payments abroad)</h3>
           </div>
           <div id="binNEITHER" class="dropzone" data-bin="NEITHER" aria-label="Neither bin"></div>
         </div>
       </div>
 
+      <!-- Polished rubric strip -->
       <div class="rubric" aria-label="Core ideas checklist">
-  <div class="rubric-item" id="ruleGDP">
-    <span class="rubric-icon" aria-hidden="true">○</span>
-    <div class="rubric-text">
-      <div class="rubric-title">GDP rule</div>
-      <div class="rubric-sub">Counts production inside U.S. borders</div>
-    </div>
-  </div>
+        <div class="rubric-item" id="ruleGDP">
+          <span class="rubric-icon" aria-hidden="true">○</span>
+          <div class="rubric-text">
+            <div class="rubric-title">GDP rule</div>
+            <div class="rubric-sub">Counts production inside U.S. borders</div>
+          </div>
+        </div>
 
-  <div class="rubric-item" id="ruleGNP">
-    <span class="rubric-icon" aria-hidden="true">○</span>
-    <div class="rubric-text">
-      <div class="rubric-title">GNP rule</div>
-      <div class="rubric-sub">Counts income earned by U.S. residents</div>
-    </div>
-  </div>
+        <div class="rubric-item" id="ruleGNP">
+          <span class="rubric-icon" aria-hidden="true">○</span>
+          <div class="rubric-text">
+            <div class="rubric-title">GNP rule</div>
+            <div class="rubric-sub">GDP adjusted by net factor income</div>
+          </div>
+        </div>
 
-  <div class="rubric-item" id="ruleID">
-    <span class="rubric-icon" aria-hidden="true">○</span>
-    <div class="rubric-text">
-      <div class="rubric-title">Identity</div>
-      <div class="rubric-sub">GNP = GDP + NFIA</div>
-    </div>
-  </div>
-</div>
+        <div class="rubric-item" id="ruleID">
+          <span class="rubric-icon" aria-hidden="true">○</span>
+          <div class="rubric-text">
+            <div class="rubric-title">Identity</div>
+            <div class="rubric-sub">GNP = GDP + NFIA</div>
+          </div>
+        </div>
+      </div>
 
-      
       <div class="results">
         <div class="results-head">
           <h2>Results</h2>
-          <p class="panel-sub">After checking, compute totals based on definitions (not your placements).</p>
+          <p class="panel-sub">Compute totals using the identity. Factor payments abroad reduce GNP via NFIA.</p>
         </div>
 
         <div class="metrics">
@@ -176,12 +178,8 @@
 
   <footer class="container footer">
     <div class="footer-inner">
-      <div class="footer-note">
-        Identity reminder: <code>GNP = GDP + NFIA</code>
-      </div>
-      <div class="footer-note">
-        Accessibility: light background + high-contrast text (astigmatism-friendly).
-      </div>
+      <div class="footer-note">Identity reminder: <code>GNP = GDP + NFIA</code></div>
+      <div class="footer-note">Theme: soft academic (warm paper background, high readability).</div>
     </div>
   </footer>
 
