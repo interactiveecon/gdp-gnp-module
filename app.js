@@ -8,6 +8,11 @@ const els = {
   resetBtn: document.getElementById("resetBtn"),
   status: document.getElementById("status"),
 
+    // rubric strip
+  ruleGDP: document.getElementById("ruleGDP"),
+  ruleGNP: document.getElementById("ruleGNP"),
+  ruleID: document.getElementById("ruleID"),
+
   pool: document.getElementById("cardPool"),
   bins: {
     GDP: document.getElementById("binGDP"),
@@ -128,6 +133,24 @@ function setupDropzone(zone) {
   });
 }
 
+function resetRubric() {
+  const items = [els.ruleGDP, els.ruleGNP, els.ruleID].filter(Boolean);
+  items.forEach(el => {
+    el.classList.remove("done");
+    const icon = el.querySelector(".rubric-icon");
+    if (icon) icon.textContent = "○";
+  });
+}
+
+function completeRubric() {
+  const items = [els.ruleGDP, els.ruleGNP, els.ruleID].filter(Boolean);
+  items.forEach(el => {
+    el.classList.add("done");
+    const icon = el.querySelector(".rubric-icon");
+    if (icon) icon.textContent = "✓";
+  });
+}
+
 function initDnD() {
   setupDropzone(els.pool);
   Object.values(els.bins).forEach(setupDropzone);
@@ -146,6 +169,8 @@ function renderRound(items) {
 
   if (els.totalCount) els.totalCount.textContent = String(items.length);
   updateProgressAndButtons();
+
+  resetRubric();
 }
 
 function resetBinsToPool() {
@@ -153,6 +178,7 @@ function resetBinsToPool() {
   const allCards = document.querySelectorAll(".card");
   allCards.forEach(c => els.pool.appendChild(c));
   updateProgressAndButtons();
+  resetRubric();
 }
 
 function getPlacementMap() {
@@ -273,6 +299,8 @@ function computeTotals() {
 
   els.explain.textContent =
     `${relation} in this set because ${nfiaText} Identity check: GNP = GDP + NFIA.`;
+
+  completeRubric();
 
   setStatus("Computed totals based on the economic definitions.");
 }
